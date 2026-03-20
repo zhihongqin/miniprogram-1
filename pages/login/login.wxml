@@ -1,0 +1,68 @@
+<view class="page-container">
+
+  <!-- 顶部装饰 -->
+  <view class="login-hero">
+    <view class="hero-icon">⚖️</view>
+    <text class="hero-title">涉外法律案例</text>
+    <text class="hero-sub">全球涉外法律案例智能查询平台</text>
+  </view>
+
+  <!-- 登录卡片 -->
+  <view class="login-card">
+    <text class="card-title">微信快捷登录</text>
+    <text class="card-sub">登录后可收藏案例、查看浏览记录</text>
+
+    <!-- 头像选择 -->
+    <view class="avatar-section">
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      >
+        <image
+          class="avatar-img"
+          src="{{avatarUrl || defaultAvatarUrl}}"
+          mode="aspectFill"
+        />
+        <view class="avatar-edit">📷</view>
+      </button>
+      <text class="avatar-hint">点击选择头像（可选）</text>
+    </view>
+
+    <!-- 昵称输入 -->
+    <view class="nickname-section">
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="请输入昵称（可选）"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        maxlength="20"
+      />
+    </view>
+
+    <!-- 登录按钮 -->
+    <button
+      class="login-btn {{loading ? 'loading' : ''}}"
+      bindtap="onLogin"
+      disabled="{{loading}}"
+    >
+      <text wx:if="{{!loading}}">微信一键登录</text>
+      <text wx:else>登录中...</text>
+    </button>
+
+    <!-- 跳过 -->
+    <view class="skip-btn" bindtap="onSkip">
+      <text>暂不登录，先浏览</text>
+    </view>
+  </view>
+
+  <!-- 隐私说明 -->
+  <view class="privacy-note">
+    <text>登录即表示同意</text>
+    <text class="link">《用户协议》</text>
+    <text>和</text>
+    <text class="link">《隐私政策》</text>
+  </view>
+
+</view>

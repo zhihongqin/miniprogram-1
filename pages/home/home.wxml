@@ -1,0 +1,110 @@
+<view class="page-container">
+
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrap" bindtap="onTapSearch">
+      <text class="search-icon">🔍</text>
+      <text class="search-placeholder">搜索案例、关键词、国家...</text>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <scroll-view class="type-scroll" scroll-x>
+      <view class="type-list">
+        <view
+          wx:for="{{caseTypes}}"
+          wx:key="value"
+          class="type-item {{selectedType === item.value ? 'active' : ''}}"
+          bindtap="onSelectType"
+          data-value="{{item.value}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+    <view class="order-btn" bindtap="onToggleOrderPicker">
+      <text>{{selectedOrder === 'created_at' ? '最新' : selectedOrder === 'importance_score' ? '重要性' : selectedOrder === 'view_count' ? '浏览量' : '判决日期'}}</text>
+      <text class="arrow {{showOrderPicker ? 'up' : ''}}">▾</text>
+    </view>
+  </view>
+
+  <!-- 排序下拉菜单 -->
+  <view class="order-mask" wx:if="{{showOrderPicker}}" bindtap="onToggleOrderPicker"></view>
+  <view class="order-dropdown" wx:if="{{showOrderPicker}}">
+    <view
+      wx:for="{{orderOptions}}"
+      wx:key="value"
+      class="order-option {{selectedOrder === item.value ? 'active' : ''}}"
+      bindtap="onSelectOrder"
+      data-value="{{item.value}}"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 案例列表 -->
+  <view class="case-list">
+
+    <!-- 统计信息 -->
+    <view class="list-header" wx:if="{{total > 0}}">
+      <text class="total-text">共 {{total}} 个案例</text>
+    </view>
+
+    <!-- 案例卡片 -->
+    <view
+      wx:for="{{cases}}"
+      wx:key="id"
+      class="case-card"
+      bindtap="onTapCase"
+      data-id="{{item.id}}"
+    >
+      <!-- 卡片头部 -->
+      <view class="case-header">
+        <view class="case-tags">
+          <view class="case-type-tag" style="background: {{item._typeColor}}20; color: {{item._typeColor}}">
+            {{item._typeName}}
+          </view>
+          <view class="country-tag" wx:if="{{item.country}}">{{item.country}}</view>
+        </view>
+        <view class="case-score" wx:if="{{item.importanceScore}}">
+          <text class="score-dot" style="color: {{item._scoreLevel.color}}">●</text>
+          <text class="score-num" style="color: {{item._scoreLevel.color}}">{{item.importanceScore}}</text>
+        </view>
+      </view>
+
+      <!-- 案例标题 -->
+      <view class="case-title text-ellipsis-2">{{item.titleZh || item.titleEn}}</view>
+
+      <!-- 英文标题（当中文标题存在时作为副标题展示） -->
+      <view class="case-title-en text-ellipsis-2" wx:if="{{item.titleZh && item.titleEn}}">
+        {{item.titleEn}}
+      </view>
+
+      <!-- 卡片底部 -->
+      <view class="case-footer">
+        <view class="case-meta">
+          <text class="meta-item" wx:if="{{item.country}}">🌐 {{item.country}}</text>
+        </view>
+        <view class="case-stats">
+          <text class="stat-item">👁 {{item.viewCount || 0}}</text>
+          <text class="stat-item" wx:if="{{item.isFavorited}}">⭐</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{cases.length > 0}}">
+      <view wx:if="{{loading && !refreshing}}">
+        <text>加载中...</text>
+      </view>
+      <view wx:elif="{{!hasMore}}">
+        <text>已显示全部 {{total}} 个案例</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && cases.length === 0}}">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无案例数据</text>
+      <text class="empty-sub">请稍后再试或调整筛选条件</text>
+    </view>
+
+  </view>
+</view>

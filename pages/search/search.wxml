@@ -1,0 +1,242 @@
+<view class="page-container">
+
+  <!-- 顶部搜索区域 -->
+  <view class="search-hero">
+    <view class="hero-title">案例检索</view>
+    <view class="hero-sub"></view>
+
+    <!-- 搜索输入框 -->
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="案例名称、关键词、法律议题..."
+        placeholder-class="search-placeholder"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="onSearch"
+        confirm-type="search"
+      />
+      <view class="clear-btn" wx:if="{{keyword}}" bindtap="onClear">
+        <text class="clear-icon">✕</text>
+      </view>
+    </view>
+
+    <!-- 操作行 -->
+    <view class="search-actions">
+      <view
+        class="filter-chip {{showFilter ? 'active' : ''}} {{(selectedType || selectedCountry) ? 'has-value' : ''}}"
+        bindtap="onToggleFilter"
+      >
+        <text class="chip-icon">⚙️</text>
+        <text class="chip-text">筛选</text>
+        <view class="chip-badge" wx:if="{{selectedType || selectedCountry}}"></view>
+      </view>
+      <view class="search-btn" bindtap="onSearch">
+        <text>搜索</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选面板（抽屉式） -->
+  <view class="filter-mask" wx:if="{{showFilter}}" bindtap="onToggleFilter"></view>
+  <view class="filter-drawer {{showFilter ? 'open' : ''}}">
+    <view class="drawer-header">
+      <text class="drawer-title">筛选条件</text>
+      <view class="drawer-close" bindtap="onToggleFilter">✕</view>
+    </view>
+
+    <view class="drawer-body">
+      <!-- 案件类型 -->
+      <view class="filter-group">
+        <text class="filter-group-label">案件类型</text>
+        <view class="filter-options">
+          <view
+            wx:for="{{caseTypes}}"
+            wx:key="value"
+            class="filter-option {{selectedType === item.value ? 'active' : ''}}"
+            bindtap="onSelectType"
+            data-value="{{item.value}}"
+          >{{item.label}}</view>
+        </view>
+      </view>
+
+      <!-- 国家/地区 -->
+      <view class="filter-group">
+        <text class="filter-group-label">国家 / 地区</text>
+        <view class="country-input-wrap">
+          <text class="country-icon">🌐</text>
+          <input
+            class="country-input"
+            placeholder="如：美国、欧盟、英国..."
+            placeholder-class="country-placeholder"
+            value="{{selectedCountry}}"
+            bindinput="onCountryInput"
+          />
+        </view>
+      </view>
+
+      <!-- 排序字段 -->
+      <view class="filter-group">
+        <text class="filter-group-label">排序方式</text>
+        <view class="filter-options">
+          <view
+            wx:for="{{orderOptions}}"
+            wx:key="value"
+            class="filter-option {{selectedOrder === item.value ? 'active' : ''}}"
+            bindtap="onSelectOrder"
+            data-value="{{item.value}}"
+          >{{item.label}}</view>
+        </view>
+      </view>
+
+      <!-- 排序方向 -->
+      <view class="filter-group">
+        <text class="filter-group-label">排序方向</text>
+        <view class="dir-toggle" bindtap="onToggleDir">
+          <view class="dir-item {{selectedDir === 'desc' ? 'active' : ''}}">
+            <text class="dir-icon">↓</text>
+            <text class="dir-text">降序</text>
+          </view>
+          <view class="dir-divider"></view>
+          <view class="dir-item {{selectedDir === 'asc' ? 'active' : ''}}">
+            <text class="dir-icon">↑</text>
+            <text class="dir-text">升序</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="drawer-footer">
+      <view class="reset-btn" bindtap="onResetFilter">重置</view>
+      <view class="apply-btn" bindtap="onApplyFilter">应用筛选</view>
+    </view>
+  </view>
+
+  <!-- 未搜索时：热门搜索 -->
+  <view class="discover-section" wx:if="{{!searched}}">
+    <view class="section-header">
+      <text class="section-title">🔥 热门搜索</text>
+    </view>
+    <view class="hot-grid">
+      <view
+        wx:for="{{hotKeywords}}"
+        wx:key="index"
+        class="hot-item"
+        bindtap="onTapHotKeyword"
+        data-kw="{{item}}"
+      >
+        <text class="hot-rank" style="color: {{index < 3 ? '#E74C3C' : '#aaa'}}">{{index + 1}}</text>
+        <text class="hot-text">{{item}}</text>
+        <text class="hot-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果区域 -->
+  <view class="result-section" wx:if="{{searched}}">
+
+    <!-- 结果头部 -->
+    <view class="result-bar">
+      <view class="result-info">
+        <text class="result-count" wx:if="{{total > 0}}">
+          共 <text class="count-num">{{total}}</text> 个结果
+        </text>
+        <text class="result-count" wx:elif="{{!loading}}">未找到相关案例</text>
+      </view>
+      <!-- 激活的筛选/排序标签 -->
+      <view class="active-filters">
+        <view class="active-tag" wx:if="{{selectedType}}" bindtap="onToggleFilter">
+          <text>{{_selectedTypeName}}</text>
+          <text class="tag-x"> ×</text>
+        </view>
+        <view class="active-tag" wx:if="{{selectedCountry}}" bindtap="onToggleFilter">
+          <text>{{selectedCountry}}</text>
+          <text class="tag-x"> ×</text>
+        </view>
+        <view class="active-tag order-tag" bindtap="onToggleFilter">
+          <text class="tag-order-icon">{{selectedDir === 'desc' ? '↓' : '↑'}}</text>
+          <text> {{_selectedOrderLabel}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 骨架屏加载 -->
+    <view wx:if="{{loading && cases.length === 0}}">
+      <view class="skeleton-card" wx:for="{{[1,2,3]}}" wx:key="index">
+        <view class="sk-line sk-tag"></view>
+        <view class="sk-line sk-title"></view>
+        <view class="sk-line sk-sub"></view>
+        <view class="sk-line sk-meta"></view>
+      </view>
+    </view>
+
+    <!-- 案例列表 -->
+    <view
+      wx:for="{{cases}}"
+      wx:key="id"
+      class="case-card"
+      bindtap="onTapCase"
+      data-id="{{item.id}}"
+    >
+      <!-- 卡片顶部：标签 + 评分 -->
+      <view class="card-top">
+        <view class="tags-row">
+          <view class="type-tag" style="background:{{item._typeColor}}18; color:{{item._typeColor}}; border-color:{{item._typeColor}}40">
+            {{item._typeName}}
+          </view>
+          <view class="country-tag" wx:if="{{item.country}}">🌐 {{item.country}}</view>
+        </view>
+        <view class="score-pill" wx:if="{{item.importanceScore}}" style="background:{{item._scoreLevel.color}}15; border-color:{{item._scoreLevel.color}}40">
+          <text class="score-num" style="color:{{item._scoreLevel.color}}">{{item.importanceScore}}</text>
+          <text class="score-lv" style="color:{{item._scoreLevel.color}}">分</text>
+        </view>
+      </view>
+
+      <!-- 标题 -->
+      <view class="card-title text-ellipsis-2">{{item.titleZh || item.titleEn}}</view>
+      <view class="card-title-en text-ellipsis-1" wx:if="{{item.titleZh && item.titleEn}}">
+        {{item.titleEn}}
+      </view>
+
+      <!-- 卡片底部：元信息 -->
+      <view class="card-bottom">
+        <view class="meta-row">
+          <text class="meta-item" wx:if="{{item.judgmentDate}}">📅 {{item.judgmentDate}}</text>
+          <text class="meta-sep" wx:if="{{item.judgmentDate && item.viewCount}}"> · </text>
+          <text class="meta-item">👁 {{item.viewCount || 0}}</text>
+          <text class="meta-sep"> · </text>
+          <text class="meta-item">⭐ {{item.favoriteCount || 0}}</text>
+        </view>
+        <view class="card-arrow">›</view>
+      </view>
+    </view>
+
+    <!-- 加载更多提示 -->
+    <view class="load-more" wx:if="{{cases.length > 0}}">
+      <view class="loading-dots" wx:if="{{loading}}">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+      <view class="no-more" wx:elif="{{!hasMore}}">
+        <view class="no-more-line"></view>
+        <text class="no-more-text">已显示全部结果</text>
+        <view class="no-more-line"></view>
+      </view>
+    </view>
+
+    <!-- 空结果 -->
+    <view class="empty-state" wx:if="{{!loading && cases.length === 0}}">
+      <view class="empty-img">🔭</view>
+      <text class="empty-title">未找到相关案例</text>
+      <text class="empty-desc">尝试更换关键词或调整筛选条件</text>
+      <view class="empty-action" bindtap="onClear">清空重新搜索</view>
+    </view>
+
+  </view>
+
+  <!-- 底部安全区 -->
+  <view style="height: 40rpx;"></view>
+
+</view>

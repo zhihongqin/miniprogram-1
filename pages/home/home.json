@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "涉外法律案例",
+  "navigationBarBackgroundColor": "#1A6FBF",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f5f6fa",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "light"
+}

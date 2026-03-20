@@ -1,0 +1,42 @@
+<view class="page-container">
+  <view class="list-header" wx:if="{{total > 0}}">
+    <text class="total-text">共收藏 {{total}} 个案例</text>
+  </view>
+
+  <view
+    wx:for="{{cases}}"
+    wx:key="id"
+    class="case-card"
+    bindtap="onTapCase"
+    data-id="{{item.id}}"
+  >
+    <view class="case-header">
+      <view class="case-tags">
+        <view class="type-tag" style="background: {{item._typeColor}}20; color: {{item._typeColor}}">
+          {{item._typeName}}
+        </view>
+        <view class="country-tag" wx:if="{{item.country}}">{{item.country}}</view>
+      </view>
+      <text class="fav-icon">⭐</text>
+    </view>
+    <view class="case-title text-ellipsis-2">{{item.titleZh || item.titleEn}}</view>
+    <view class="case-title-en text-ellipsis-2" wx:if="{{item.titleZh && item.titleEn}}">
+      {{item.titleEn}}
+    </view>
+    <view class="case-footer">
+      <text class="meta" wx:if="{{item.country}}">🌐 {{item.country}}</text>
+      <text class="meta-views"> · 👁 {{item.viewCount || 0}}</text>
+    </view>
+  </view>
+
+  <view class="load-more" wx:if="{{cases.length > 0}}">
+    <text wx:if="{{loading}}">加载中...</text>
+    <text wx:elif="{{!hasMore}}">已显示全部收藏</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && cases.length === 0}}">
+    <text class="empty-icon">⭐</text>
+    <text class="empty-text">暂无收藏</text>
+    <text class="empty-sub">浏览案例时点击收藏按钮即可保存</text>
+  </view>
+</view>

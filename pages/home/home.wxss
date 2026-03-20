@@ -1,0 +1,282 @@
+/* home.wxss */
+
+/* ─── 搜索栏 ─────────────────────────────────────────────────────────────────── */
+.search-bar {
+  background: #1A6FBF;
+  padding: 20rpx 30rpx 24rpx;
+}
+
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.18);
+  border-radius: 50rpx;
+  padding: 16rpx 28rpx;
+  gap: 12rpx;
+}
+
+.search-icon {
+  font-size: 28rpx;
+}
+
+.search-placeholder {
+  color: rgba(255,255,255,0.75);
+  font-size: 26rpx;
+  flex: 1;
+}
+
+/* ─── 筛选栏 ─────────────────────────────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-bottom: 1rpx solid #eee;
+  padding: 0 20rpx 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.type-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.type-list {
+  display: flex;
+  padding: 16rpx 20rpx;
+  gap: 16rpx;
+}
+
+.type-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 28rpx;
+  border-radius: 50rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f5f6fa;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.type-item.active {
+  background: #EBF3FC;
+  color: #1A6FBF;
+  font-weight: 600;
+}
+
+.order-btn {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 10rpx 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  white-space: nowrap;
+  border-left: 1rpx solid #eee;
+}
+
+.arrow {
+  font-size: 20rpx;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.arrow.up {
+  transform: rotate(180deg);
+}
+
+/* ─── 排序下拉 ───────────────────────────────────────────────────────────────── */
+.order-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 98;
+}
+
+.order-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.15);
+  z-index: 99;
+  min-width: 200rpx;
+  overflow: hidden;
+}
+
+.order-option {
+  padding: 24rpx 36rpx;
+  font-size: 28rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.order-option:last-child {
+  border-bottom: none;
+}
+
+.order-option.active {
+  color: #1A6FBF;
+  font-weight: 600;
+  background: #EBF3FC;
+}
+
+/* ─── 案例列表 ───────────────────────────────────────────────────────────────── */
+.case-list {
+  padding: 20rpx 24rpx;
+}
+
+.list-header {
+  padding: 10rpx 4rpx 16rpx;
+}
+
+.total-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* ─── 案例卡片 ───────────────────────────────────────────────────────────────── */
+.case-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+  transition: transform 0.15s;
+}
+
+.case-card:active {
+  transform: scale(0.98);
+}
+
+.case-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.case-tags {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.case-type-tag {
+  padding: 6rpx 18rpx;
+  border-radius: 50rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.country-tag {
+  padding: 6rpx 18rpx;
+  border-radius: 50rpx;
+  font-size: 22rpx;
+  background: #f5f6fa;
+  color: #666;
+}
+
+.case-score {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.score-dot {
+  font-size: 18rpx;
+}
+
+.score-num {
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.case-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.5;
+  margin-bottom: 14rpx;
+}
+
+.case-title-en {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+  font-style: italic;
+}
+
+.case-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.case-meta {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.meta-item {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.meta-sep {
+  font-size: 24rpx;
+  color: #ccc;
+}
+
+.case-stats {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.stat-item {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* ─── 空状态 ─────────────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
+  gap: 16rpx;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.empty-sub {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* ─── 加载更多 ───────────────────────────────────────────────────────────────── */
+.load-more {
+  text-align: center;
+  padding: 30rpx;
+  color: #999;
+  font-size: 26rpx;
+}

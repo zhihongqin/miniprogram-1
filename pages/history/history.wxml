@@ -1,0 +1,61 @@
+<view class="page-container">
+
+  <!-- 顶部操作栏 -->
+  <view class="top-bar" wx:if="{{records.length > 0}}">
+    <text class="total-text">共 {{total}} 条记录</text>
+    <view class="edit-actions">
+      <view
+        wx:if="{{editMode}}"
+        class="delete-btn {{selectedIds.length > 0 ? 'active' : ''}}"
+        bindtap="onDeleteSelected"
+      >删除({{selectedIds.length}})</view>
+      <view class="edit-btn" bindtap="onToggleEdit">
+        {{editMode ? '完成' : '管理'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录列表 -->
+  <!-- BrowseHistoryVO 字段：id / caseId / titleZh / titleEn / createdAt -->
+  <view
+    wx:for="{{records}}"
+    wx:key="id"
+    class="record-card"
+    bindtap="onTapRecord"
+    data-id="{{item.caseId}}"
+    data-record-id="{{item.id}}"
+  >
+    <!-- 编辑模式选择框 -->
+    <view class="checkbox" wx:if="{{editMode}}">
+      <text class="check-icon">{{selectedIds.indexOf(item.id) >= 0 ? '✅' : '⬜'}}</text>
+    </view>
+
+    <view class="record-content">
+      <view class="record-header">
+        <text class="time-str">{{item._timeStr}}</text>
+      </view>
+      <!-- 优先展示中文标题，无中文则展示英文 -->
+      <view class="record-title text-ellipsis-2">
+        {{item.titleZh || item.titleEn}}
+      </view>
+      <!-- 有中文标题时，英文标题作为副标题 -->
+      <view class="record-title-en text-ellipsis-2" wx:if="{{item.titleZh && item.titleEn}}">
+        {{item.titleEn}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{records.length > 0}}">
+    <text wx:if="{{loading}}">加载中...</text>
+    <text wx:elif="{{!hasMore}}">已显示全部记录</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && records.length === 0}}">
+    <text class="empty-icon">🕐</text>
+    <text class="empty-text">暂无浏览记录</text>
+    <text class="empty-sub">浏览案例后会自动记录在这里</text>
+  </view>
+
+</view>

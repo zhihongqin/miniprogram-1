@@ -1,0 +1,186 @@
+<view class="page-container">
+
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 详情内容 -->
+  <block wx:elif="{{caseDetail}}">
+
+    <!-- 头部信息卡片 -->
+    <view class="header-card">
+      <view class="tags-row">
+        <view class="type-tag" style="background: {{caseDetail._typeColor}}20; color: {{caseDetail._typeColor}}">
+          {{caseDetail._typeName}}
+        </view>
+        <view class="country-tag" wx:if="{{caseDetail.country}}">🌐 {{caseDetail.country}}</view>
+        <view class="source-tag" wx:if="{{caseDetail.source}}">{{caseDetail.source}}</view>
+      </view>
+
+      <view class="case-title">{{caseDetail.titleZh || caseDetail.titleEn}}</view>
+
+      <view class="title-en text-ellipsis-2" wx:if="{{caseDetail.titleZh && caseDetail.titleEn}}">
+        {{caseDetail.titleEn}}
+      </view>
+
+      <!-- 基本信息 -->
+      <view class="info-grid">
+        <view class="info-item" wx:if="{{caseDetail.caseNo}}">
+          <text class="info-label">案号</text>
+          <text class="info-value">{{caseDetail.caseNo}}</text>
+        </view>
+        <view class="info-item" wx:if="{{caseDetail.court}}">
+          <text class="info-label">法院</text>
+          <text class="info-value">{{caseDetail.court}}</text>
+        </view>
+        <view class="info-item" wx:if="{{caseDetail._dateStr}}">
+          <text class="info-label">判决日期</text>
+          <text class="info-value">{{caseDetail._dateStr}}</text>
+        </view>
+        <view class="info-item" wx:if="{{caseDetail.legalProvisions}}">
+          <text class="info-label">法律条文</text>
+          <text class="info-value">{{caseDetail.legalProvisions}}</text>
+        </view>
+      </view>
+
+      <!-- 关键词 -->
+      <view class="keywords-row" wx:if="{{caseDetail.keywords}}">
+        <view class="keyword-tag" wx:for="{{caseDetail.keywords.split(',')}}" wx:key="index">
+          {{item.trim()}}
+        </view>
+      </view>
+
+      <!-- 操作栏 -->
+      <view class="action-row">
+        <view class="action-stats">
+          <text class="stat">👁 {{caseDetail.viewCount || 0}} 次浏览</text>
+          <text class="stat">⭐ {{caseDetail.favoriteCount || 0}} 次收藏</text>
+        </view>
+        <view class="action-btns">
+          <view class="source-btn" wx:if="{{caseDetail.url}}" bindtap="onOpenSource">
+            <text>🔗 原文</text>
+          </view>
+          <view
+            class="fav-btn {{caseDetail.isFavorited ? 'favorited' : ''}}"
+            bindtap="onToggleFavorite"
+          >
+            <text>{{caseDetail.isFavorited ? '⭐ 已收藏' : '☆ 收藏'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 评分卡片：importanceScore 来自 CaseListVO，score 子对象来自 CaseScoreVO -->
+    <view class="score-card" wx:if="{{caseDetail.importanceScore || caseDetail.score}}">
+      <view class="score-header">
+        <text class="score-title">重要性评分</text>
+        <view class="score-badge-wrap" wx:if="{{caseDetail.importanceScore}}">
+          <text class="score-value" style="color: {{caseDetail._scoreLevel.color}}">
+            {{caseDetail.importanceScore}}
+          </text>
+          <text class="score-label" style="color: {{caseDetail._scoreLevel.color}}">
+            {{caseDetail._scoreLevel.label}}
+          </text>
+        </view>
+      </view>
+      <view class="score-bar-wrap" wx:if="{{caseDetail.importanceScore}}">
+        <view class="score-bar">
+          <view class="score-fill" style="width: {{caseDetail.importanceScore}}%; background: {{caseDetail._scoreLevel.color}}"></view>
+        </view>
+      </view>
+      <!-- score.scoreReason：AI 评分理由 -->
+      <view class="score-reason" wx:if="{{caseDetail.score && caseDetail.score.scoreReason}}">
+        <text>{{caseDetail.score.scoreReason}}</text>
+      </view>
+      <!-- 细分评分：importanceScore / influenceScore / referenceScore -->
+      <view class="score-dims" wx:if="{{caseDetail.score}}">
+        <view class="dim-item" wx:if="{{caseDetail.score.importanceScore != null}}">
+          <text class="dim-label">重要性</text>
+          <text class="dim-value">{{caseDetail.score.importanceScore}}</text>
+        </view>
+        <view class="dim-item" wx:if="{{caseDetail.score.influenceScore != null}}">
+          <text class="dim-label">影响力</text>
+          <text class="dim-value">{{caseDetail.score.influenceScore}}</text>
+        </view>
+        <view class="dim-item" wx:if="{{caseDetail.score.referenceScore != null}}">
+          <text class="dim-label">参考价值</text>
+          <text class="dim-value">{{caseDetail.score.referenceScore}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 摘要卡片：summary 子对象字段为 caseReason / disputeFocus / judgmentResult -->
+    <view class="summary-card" wx:if="{{caseDetail.summary || caseDetail.summaryZh}}">
+      <view class="section-title">📋 案例摘要</view>
+
+      <!-- summary.caseReason：AI 提取的核心案由 -->
+      <view wx:if="{{caseDetail.summary && caseDetail.summary.caseReason}}" class="summary-item">
+        <text class="summary-label">案由</text>
+        <text class="summary-content">{{caseDetail.summary.caseReason}}</text>
+      </view>
+
+      <!-- summary.disputeFocus：争议焦点 -->
+      <view wx:if="{{caseDetail.summary && caseDetail.summary.disputeFocus}}" class="summary-item">
+        <text class="summary-label">争议焦点</text>
+        <text class="summary-content">{{caseDetail.summary.disputeFocus}}</text>
+      </view>
+
+      <!-- summary.judgmentResult：判决结果 -->
+      <view wx:if="{{caseDetail.summary && caseDetail.summary.judgmentResult}}" class="summary-item">
+        <text class="summary-label">判决结果</text>
+        <text class="summary-content">{{caseDetail.summary.judgmentResult}}</text>
+      </view>
+
+      <!-- summaryZh：CaseDetailVO 顶层字段，AI 综合摘要 -->
+      <view wx:if="{{caseDetail.summaryZh}}" class="summary-item">
+        <text class="summary-label">AI摘要</text>
+        <text class="summary-content">{{caseDetail.summaryZh}}</text>
+      </view>
+    </view>
+
+    <!-- 内容 Tab 切换 -->
+    <view class="content-card">
+      <view class="tab-bar">
+        <view
+          class="tab-item {{activeTab === 'zh' ? 'active' : ''}}"
+          bindtap="onSwitchTab"
+          data-tab="zh"
+          wx:if="{{caseDetail.contentZh}}"
+        >中文全文</view>
+        <view
+          class="tab-item {{activeTab === 'en' ? 'active' : ''}}"
+          bindtap="onSwitchTab"
+          data-tab="en"
+          wx:if="{{caseDetail.contentEn}}"
+        >英文原文</view>
+      </view>
+
+      <!-- 中文内容 -->
+      <view class="content-body" wx:if="{{activeTab === 'zh' && caseDetail.contentZh}}">
+        <text class="content-text" selectable>{{caseDetail.contentZh}}</text>
+      </view>
+
+      <!-- 英文内容 -->
+      <view class="content-body" wx:if="{{activeTab === 'en' && caseDetail.contentEn}}">
+        <text class="content-text" selectable>{{caseDetail.contentEn}}</text>
+      </view>
+
+      <!-- 无内容提示 -->
+      <view class="no-content" wx:if="{{!caseDetail.contentZh && !caseDetail.contentEn}}">
+        <text>暂无全文内容</text>
+      </view>
+    </view>
+
+    <!-- 底部安全区 -->
+    <view style="height: 40rpx;"></view>
+
+  </block>
+
+  <!-- 错误状态 -->
+  <view class="error-state" wx:elif="{{!loading}}">
+    <text class="error-icon">⚠️</text>
+    <text class="error-text">案例加载失败</text>
+  </view>
+
+</view>

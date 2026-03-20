@@ -1,0 +1,91 @@
+<view class="page-container">
+
+  <!-- 用户信息头部 -->
+  <view class="user-header">
+    <view wx:if="{{isLoggedIn}}">
+      <view class="user-info">
+        <image
+          class="avatar"
+          src="{{userInfo.avatarUrl || '/assets/icons/default-avatar.png'}}"
+          mode="aspectFill"
+        />
+        <view class="user-detail">
+          <text class="nickname">{{userInfo.nickname || '用户'}}</text>
+          <text class="user-role" wx:if="{{userInfo.role === 1}}">管理员</text>
+          <text class="user-role normal" wx:else>普通用户</text>
+        </view>
+      </view>
+      <view class="user-stats">
+        <view class="stat-item" bindtap="onTapFavorites">
+          <text class="stat-num">{{favoriteCount}}</text>
+          <text class="stat-label">收藏</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item" bindtap="onTapHistory">
+          <text class="stat-num">{{historyCount}}</text>
+          <text class="stat-label">浏览记录</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="not-login" bindtap="onTapLogin">
+      <view class="avatar-placeholder">👤</view>
+      <view class="login-prompt">
+        <text class="login-title">点击登录</text>
+        <text class="login-sub">登录后可收藏案例、查看浏览记录</text>
+      </view>
+      <text class="arrow-right">›</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-group">
+      <view class="menu-item" bindtap="onTapFavorites">
+        <view class="menu-icon-wrap fav">
+          <text class="menu-icon">⭐</text>
+        </view>
+        <text class="menu-text">我的收藏</text>
+        <view class="menu-right">
+          <text class="menu-count" wx:if="{{isLoggedIn && favoriteCount > 0}}">{{favoriteCount}}</text>
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="onTapHistory">
+        <view class="menu-icon-wrap history">
+          <text class="menu-icon">🕐</text>
+        </view>
+        <text class="menu-text">浏览记录</text>
+        <view class="menu-right">
+          <text class="menu-count" wx:if="{{isLoggedIn && historyCount > 0}}">{{historyCount}}</text>
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="menu-group">
+      <view class="menu-item" bindtap="onTapAbout">
+        <view class="menu-icon-wrap about">
+          <text class="menu-icon">ℹ️</text>
+        </view>
+        <text class="menu-text">关于系统</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="menu-group" wx:if="{{isLoggedIn}}">
+      <view class="menu-item logout" bindtap="onTapLogout">
+        <text class="logout-text">退出登录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>涉外法律案例查询系统 v1.0</text>
+  </view>
+
+</view>
