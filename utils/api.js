@@ -59,6 +59,13 @@ function request(options) {
               app.globalData.token = null
               app.globalData.userInfo = null
             }
+            // 非登录页时自动跳转
+            const pages = getCurrentPages()
+            const currentPage = pages[pages.length - 1]
+            const route = currentPage ? currentPage.route : ''
+            if (route && !route.includes('login')) {
+              wx.navigateTo({ url: '/pages/login/login' })
+            }
             reject({ code: 401, message: '请先登录' })
           } else {
             reject({ code: data.code, message: data.message || '请求失败' })
@@ -130,6 +137,21 @@ function deleteBrowseHistory(ids) {
   return request({ url: '/cases/browse-history', method: 'DELETE', data: ids })
 }
 
+// ─── 智能问答接口 ─────────────────────────────────────────────────────────────
+
+/**
+ * 智能法律问答（经后端代理转发至 FastGPT）
+ * @param {string} question - 用户提问内容
+ * @param {string} chatId   - 会话 ID，用于保持多轮上下文
+ */
+function askLegalQuestion(question, chatId) {
+  return request({
+    url: '/chat/ask',
+    method: 'POST',
+    data: { question, chatId }
+  })
+}
+
 module.exports = {
   BASE_URL,
   request,
@@ -142,5 +164,6 @@ module.exports = {
   toggleFavorite,
   getFavorites,
   getBrowseHistory,
-  deleteBrowseHistory
+  deleteBrowseHistory,
+  askLegalQuestion
 }

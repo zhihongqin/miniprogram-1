@@ -1,0 +1,140 @@
+<view class="chat-page">
+
+  <!-- 顶部工具栏 -->
+  <view class="chat-toolbar">
+    <view class="toolbar-left">
+      <text class="toolbar-title">⚖️ 法律智能助手</text>
+      <view class="status-dot {{isLoggedIn ? '' : 'offline'}}"></view>
+      <text class="status-text {{isLoggedIn ? '' : 'offline-text'}}">{{isLoggedIn ? '在线' : '未登录'}}</text>
+    </view>
+    <view class="toolbar-right" bindtap="onClearChat" wx:if="{{isLoggedIn}}">
+      <text class="clear-icon">🗑</text>
+      <text class="clear-text">清空</text>
+    </view>
+  </view>
+
+  <!-- ─── 未登录提示 ─── -->
+  <view class="login-gate" wx:if="{{!isLoggedIn}}">
+    <view class="gate-icon">⚖️</view>
+    <view class="gate-title">法律智能助手</view>
+    <view class="gate-desc">登录后即可与 AI 法律助手对话，获取专业的涉外法律解答</view>
+    <view class="gate-features">
+      <view class="feature-item">
+        <text class="feature-icon">💬</text>
+        <text class="feature-text">多轮对话，记忆上下文</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">📚</text>
+        <text class="feature-text">基于真实案例知识库</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🔒</text>
+        <text class="feature-text">对话记录安全保存</text>
+      </view>
+    </view>
+    <view class="gate-login-btn" bindtap="onGoLogin">立即登录</view>
+  </view>
+
+  <!-- ─── 已登录：对话界面 ─── -->
+  <block wx:if="{{isLoggedIn}}">
+
+    <!-- 消息列表 -->
+    <scroll-view
+      class="msg-scroll"
+      scroll-y="{{true}}"
+      scroll-into-view="{{scrollToId}}"
+      scroll-with-animation="{{true}}"
+      enhanced="{{true}}"
+      show-scrollbar="{{false}}"
+    >
+      <view class="msg-list">
+
+        <view
+          wx:for="{{messages}}"
+          wx:key="id"
+          id="{{item.id}}"
+          class="msg-row {{item.role === 'user' ? 'user-row' : 'ai-row'}}"
+        >
+          <!-- AI 头像 -->
+          <view class="avatar ai-avatar" wx:if="{{item.role === 'ai'}}">
+            <text class="avatar-emoji">⚖️</text>
+          </view>
+
+          <!-- 消息气泡 -->
+          <view class="bubble-wrap {{item.role === 'user' ? 'bubble-wrap-user' : ''}}">
+            <view class="bubble {{item.role === 'user' ? 'user-bubble' : 'ai-bubble'}}">
+              <view class="dot-wave" wx:if="{{item.thinking}}">
+                <view class="dot d1"></view>
+                <view class="dot d2"></view>
+                <view class="dot d3"></view>
+              </view>
+              <text
+                wx:else
+                class="bubble-text"
+                user-select="{{true}}"
+                space="nbsp"
+              >{{item.content}}</text>
+            </view>
+            <text class="msg-time">{{item.time}}</text>
+          </view>
+
+          <!-- 用户头像 -->
+          <view class="avatar user-avatar" wx:if="{{item.role === 'user'}}">
+            <text class="avatar-emoji">👤</text>
+          </view>
+        </view>
+
+        <!-- 快捷问题 -->
+        <view class="quick-section" wx:if="{{showQuickQuestions}}">
+          <text class="quick-title">💡 您可以这样问我</text>
+          <view class="quick-list">
+            <view
+              wx:for="{{quickQuestions}}"
+              wx:key="index"
+              wx:for-item="q"
+              class="quick-item"
+              bindtap="onTapQuickQuestion"
+              data-q="{{q}}"
+            >
+              <text class="quick-text">{{q}}</text>
+              <text class="quick-arrow">›</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 30rpx;"></view>
+      </view>
+    </scroll-view>
+
+    <!-- 底部输入区 -->
+    <view class="input-bar">
+      <view class="input-wrap">
+        <input
+          class="chat-input"
+          placeholder="输入您的法律问题..."
+          placeholder-class="chat-placeholder"
+          value="{{inputText}}"
+          bindinput="onInputChange"
+          bindconfirm="onSend"
+          adjust-position="{{true}}"
+          cursor-spacing="20"
+          maxlength="500"
+          confirm-type="send"
+        />
+      </view>
+      <view
+        class="send-btn {{inputText && !loading ? 'send-active' : 'send-disabled'}}"
+        bindtap="onSend"
+      >
+        <text wx:if="{{!loading}}">发送</text>
+        <view class="send-loading" wx:else>
+          <view class="mini-dot"></view>
+          <view class="mini-dot"></view>
+          <view class="mini-dot"></view>
+        </view>
+      </view>
+    </view>
+
+  </block>
+
+</view>

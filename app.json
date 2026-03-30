@@ -2,6 +2,7 @@
   "pages": [
     "pages/home/home",
     "pages/search/search",
+    "pages/chat/chat",
     "pages/detail/detail",
     "pages/profile/profile",
     "pages/login/login",
@@ -25,6 +26,12 @@
         "text": "搜索",
         "iconPath": "assets/icons/search.png",
         "selectedIconPath": "assets/icons/search-active.png"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "问答",
+        "iconPath": "assets/icons/chat.png",
+        "selectedIconPath": "assets/icons/chat-active.png"
       },
       {
         "pagePath": "pages/profile/profile",
