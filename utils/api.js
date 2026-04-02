@@ -140,15 +140,51 @@ function deleteBrowseHistory(ids) {
 // ─── 智能问答接口 ─────────────────────────────────────────────────────────────
 
 /**
- * 智能法律问答（经后端代理转发至 FastGPT）
- * @param {string} question - 用户提问内容
- * @param {string} chatId   - 会话 ID，用于保持多轮上下文
+ * 异步提问 —— 立即返回 { taskId, chatId, status:"PENDING" }，不等待 AI 完成。
+ * 后续通过 pollChatResult 轮询结果。
  */
 function askLegalQuestion(question, chatId) {
   return request({
     url: '/chat/ask',
     method: 'POST',
     data: { question, chatId }
+  })
+}
+
+/**
+ * 轮询问答任务结果。
+ * 返回 { taskId, chatId, status, answer, errorMsg }
+ * status: "PENDING" | "DONE" | "ERROR"
+ */
+function pollChatResult(taskId) {
+  return request({
+    url: `/chat/result/${taskId}`,
+    method: 'GET'
+  })
+}
+
+/** 分页获取历史会话列表 */
+function getChatSessions(page = 1, pageSize = 20) {
+  return request({
+    url: '/chat/sessions',
+    method: 'GET',
+    data: { page, pageSize }
+  })
+}
+
+/** 获取指定会话的消息详情 */
+function getChatSessionDetail(chatId) {
+  return request({
+    url: `/chat/sessions/${chatId}`,
+    method: 'GET'
+  })
+}
+
+/** 删除会话 */
+function deleteChatSession(chatId) {
+  return request({
+    url: `/chat/sessions/${chatId}`,
+    method: 'DELETE'
   })
 }
 
@@ -165,5 +201,9 @@ module.exports = {
   getFavorites,
   getBrowseHistory,
   deleteBrowseHistory,
-  askLegalQuestion
+  askLegalQuestion,
+  pollChatResult,
+  getChatSessions,
+  getChatSessionDetail,
+  deleteChatSession
 }

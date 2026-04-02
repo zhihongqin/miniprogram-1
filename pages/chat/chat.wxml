@@ -1,44 +1,73 @@
-<view class="chat-page">
+<view class="page">
 
-  <!-- 顶部工具栏 -->
-  <view class="chat-toolbar">
-    <view class="toolbar-left">
-      <text class="toolbar-title">⚖️ 法律智能助手</text>
-      <view class="status-dot {{isLoggedIn ? '' : 'offline'}}"></view>
-      <text class="status-text {{isLoggedIn ? '' : 'offline-text'}}">{{isLoggedIn ? '在线' : '未登录'}}</text>
+  <!-- ══════════ 顶部导航栏 ══════════ -->
+  <view class="navbar">
+    <view class="navbar-left" bindtap="onOpenHistory">
+      <view class="history-btn">
+        <text class="history-icon">☰</text>
+      </view>
     </view>
-    <view class="toolbar-right" bindtap="onClearChat" wx:if="{{isLoggedIn}}">
-      <text class="clear-icon">🗑</text>
-      <text class="clear-text">清空</text>
+
+    <view class="navbar-center">
+      <text class="navbar-title" wx:if="{{isLoggedIn}}">{{sessionTitle}}</text>
+      <text class="navbar-title" wx:else>法律智能助手</text>
+    </view>
+
+    <view class="navbar-right">
+      <view class="new-btn" bindtap="onNewChat" wx:if="{{isLoggedIn}}">
+        <text class="new-icon">＋</text>
+        <text class="new-text">新对话</text>
+      </view>
+      <view class="login-btn-small" bindtap="onGoLogin" wx:else>
+        <text class="login-btn-text">登录</text>
+      </view>
     </view>
   </view>
 
-  <!-- ─── 未登录提示 ─── -->
-  <view class="login-gate" wx:if="{{!isLoggedIn}}">
-    <view class="gate-icon">⚖️</view>
-    <view class="gate-title">法律智能助手</view>
-    <view class="gate-desc">登录后即可与 AI 法律助手对话，获取专业的涉外法律解答</view>
-    <view class="gate-features">
-      <view class="feature-item">
-        <text class="feature-icon">💬</text>
-        <text class="feature-text">多轮对话，记忆上下文</text>
+  <!-- ══════════ 未登录引导页 ══════════ -->
+  <view class="gate" wx:if="{{!isLoggedIn}}">
+    <view class="gate-card">
+      <view class="gate-logo">⚖️</view>
+      <view class="gate-name">法律智能助手</view>
+      <view class="gate-slogan">专业涉外法律 · 智能即时解答</view>
+      <view class="gate-divider"></view>
+      <view class="gate-feature-list">
+        <view class="gate-feature">
+          <text class="gf-dot"></text>
+          <text class="gf-text">多轮对话，保持上下文记忆</text>
+        </view>
+        <view class="gate-feature">
+          <text class="gf-dot"></text>
+          <text class="gf-text">基于真实涉外案例知识库</text>
+        </view>
+        <view class="gate-feature">
+          <text class="gf-dot"></text>
+          <text class="gf-text">历史对话随时查阅回顾</text>
+        </view>
       </view>
-      <view class="feature-item">
-        <text class="feature-icon">📚</text>
-        <text class="feature-text">基于真实案例知识库</text>
-      </view>
-      <view class="feature-item">
-        <text class="feature-icon">🔒</text>
-        <text class="feature-text">对话记录安全保存</text>
+      <view class="gate-login-btn" bindtap="onGoLogin">
+        <text>立即登录，开始咨询</text>
       </view>
     </view>
-    <view class="gate-login-btn" bindtap="onGoLogin">立即登录</view>
+    <!-- 快捷示例（未登录可见，点击触发登录） -->
+    <view class="gate-examples">
+      <text class="examples-label">热门咨询问题</text>
+      <view class="example-list">
+        <view
+          wx:for="{{quickQuestions}}"
+          wx:key="index"
+          class="example-item"
+          bindtap="onGoLogin"
+        >
+          <text class="example-text">{{item}}</text>
+          <text class="example-lock">🔒</text>
+        </view>
+      </view>
+    </view>
   </view>
 
-  <!-- ─── 已登录：对话界面 ─── -->
+  <!-- ══════════ 已登录：对话主体 ══════════ -->
   <block wx:if="{{isLoggedIn}}">
-
-    <!-- 消息列表 -->
     <scroll-view
       class="msg-scroll"
       scroll-y="{{true}}"
@@ -49,92 +78,167 @@
     >
       <view class="msg-list">
 
+        <!-- 消息气泡 -->
         <view
           wx:for="{{messages}}"
           wx:key="id"
           id="{{item.id}}"
-          class="msg-row {{item.role === 'user' ? 'user-row' : 'ai-row'}}"
+          class="msg-row {{item.role === 'user' ? 'row-user' : 'row-ai'}}"
         >
-          <!-- AI 头像 -->
-          <view class="avatar ai-avatar" wx:if="{{item.role === 'ai'}}">
-            <text class="avatar-emoji">⚖️</text>
+          <view class="avatar {{item.role === 'user' ? 'avatar-user' : 'avatar-ai'}}">
+            <text class="avatar-text">{{item.role === 'user' ? '我' : '⚖'}}</text>
           </view>
 
-          <!-- 消息气泡 -->
-          <view class="bubble-wrap {{item.role === 'user' ? 'bubble-wrap-user' : ''}}">
-            <view class="bubble {{item.role === 'user' ? 'user-bubble' : 'ai-bubble'}}">
-              <view class="dot-wave" wx:if="{{item.thinking}}">
-                <view class="dot d1"></view>
-                <view class="dot d2"></view>
-                <view class="dot d3"></view>
+          <view class="bubble-col {{item.role === 'user' ? 'bubble-col-user' : ''}}">
+            <view class="bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+              <!-- 思考动画 -->
+              <view class="thinking" wx:if="{{item.thinking}}">
+                <view class="t-dot td1"></view>
+                <view class="t-dot td2"></view>
+                <view class="t-dot td3"></view>
               </view>
+              <!-- AI 消息：rich-text 渲染 Markdown -->
+              <rich-text
+                wx:elif="{{item.role === 'ai'}}"
+                class="ai-rich"
+                nodes="{{item.nodes}}"
+              ></rich-text>
+              <!-- 用户消息：纯文本 -->
               <text
                 wx:else
-                class="bubble-text"
+                class="bubble-txt"
                 user-select="{{true}}"
                 space="nbsp"
               >{{item.content}}</text>
             </view>
             <text class="msg-time">{{item.time}}</text>
           </view>
-
-          <!-- 用户头像 -->
-          <view class="avatar user-avatar" wx:if="{{item.role === 'user'}}">
-            <text class="avatar-emoji">👤</text>
-          </view>
         </view>
 
-        <!-- 快捷问题 -->
-        <view class="quick-section" wx:if="{{showQuickQuestions}}">
-          <text class="quick-title">💡 您可以这样问我</text>
-          <view class="quick-list">
+        <!-- 快捷问题卡片（首次进入展示） -->
+        <view class="quick-card" wx:if="{{showQuickQuestions && messages.length <= 1}}">
+          <view class="quick-header">
+            <text class="quick-icon">💡</text>
+            <text class="quick-label">点击快速提问</text>
+          </view>
+          <view class="quick-grid">
             <view
               wx:for="{{quickQuestions}}"
               wx:key="index"
               wx:for-item="q"
-              class="quick-item"
+              class="quick-chip"
               bindtap="onTapQuickQuestion"
               data-q="{{q}}"
             >
-              <text class="quick-text">{{q}}</text>
-              <text class="quick-arrow">›</text>
+              <text class="chip-txt">{{q}}</text>
             </view>
           </view>
         </view>
 
-        <view style="height: 30rpx;"></view>
+        <view style="height:24rpx;"></view>
       </view>
     </scroll-view>
 
     <!-- 底部输入区 -->
-    <view class="input-bar">
-      <view class="input-wrap">
+    <view class="input-area">
+      <view class="input-box">
         <input
-          class="chat-input"
+          class="input-field"
           placeholder="输入您的法律问题..."
-          placeholder-class="chat-placeholder"
+          placeholder-class="input-ph"
           value="{{inputText}}"
           bindinput="onInputChange"
           bindconfirm="onSend"
           adjust-position="{{true}}"
-          cursor-spacing="20"
+          cursor-spacing="16"
           maxlength="500"
           confirm-type="send"
         />
+        <text class="char-count" wx:if="{{inputLen > 400}}">{{inputLen}}/500</text>
       </view>
       <view
-        class="send-btn {{inputText && !loading ? 'send-active' : 'send-disabled'}}"
+        class="send-btn {{(inputText && !loading) ? 'send-on' : 'send-off'}}"
         bindtap="onSend"
       >
-        <text wx:if="{{!loading}}">发送</text>
-        <view class="send-loading" wx:else>
-          <view class="mini-dot"></view>
-          <view class="mini-dot"></view>
-          <view class="mini-dot"></view>
+        <view wx:if="{{loading}}" class="send-loading">
+          <view class="sl-dot"></view>
+          <view class="sl-dot"></view>
+          <view class="sl-dot"></view>
         </view>
+        <text wx:else class="send-txt">发送</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ══════════ 历史会话侧边栏 ══════════ -->
+  <view class="history-mask" wx:if="{{showHistory}}" bindtap="onCloseHistory"></view>
+  <view class="history-panel {{showHistory ? 'panel-open' : ''}}">
+    <view class="panel-head">
+      <text class="panel-title">历史对话</text>
+      <view class="panel-close" bindtap="onCloseHistory">✕</view>
+    </view>
+
+    <!-- 加载中骨架 -->
+    <view wx:if="{{historyLoading && historyList.length === 0}}">
+      <view class="sk-item" wx:for="{{[1,2,3,4]}}" wx:key="index">
+        <view class="sk-line sk-title"></view>
+        <view class="sk-line sk-sub"></view>
       </view>
     </view>
 
-  </block>
+    <!-- 空状态 -->
+    <view class="panel-empty" wx:elif="{{!historyLoading && historyList.length === 0}}">
+      <text class="empty-icon">💬</text>
+      <text class="empty-tip">暂无历史对话</text>
+    </view>
+
+    <!-- 会话列表 -->
+    <scroll-view
+      scroll-y="{{true}}"
+      class="history-scroll"
+      wx:else
+      bindscrolltolower="onHistoryScrollToLower"
+      show-scrollbar="{{false}}"
+    >
+      <view
+        wx:for="{{historyList}}"
+        wx:key="id"
+        class="h-item {{chatId === item.chatId ? 'h-item-active' : ''}}"
+        bindtap="onTapHistory"
+        data-chat-id="{{item.chatId}}"
+        data-title="{{item.title}}"
+      >
+        <view class="h-item-body">
+          <view class="h-item-title">{{item.title || '无标题对话'}}</view>
+          <view class="h-item-meta">
+            <text class="h-item-count">{{item.messageCount}}条消息</text>
+            <text class="h-item-sep"> · </text>
+            <text class="h-item-time">{{item._timeAgo}}</text>
+          </view>
+          <view class="h-item-preview" wx:if="{{item.lastQuestion}}">{{item.lastQuestion}}</view>
+        </view>
+        <view
+          class="h-del-btn"
+          catchtap="onDeleteHistory"
+          data-chat-id="{{item.chatId}}"
+          data-index="{{index}}"
+        >🗑</view>
+      </view>
+
+      <view class="h-loading" wx:if="{{historyLoading}}">
+        <view class="sl-dot"></view>
+        <view class="sl-dot"></view>
+        <view class="sl-dot"></view>
+      </view>
+      <view class="h-nomore" wx:elif="{{!historyHasMore && historyList.length > 0}}">
+        已加载全部
+      </view>
+    </scroll-view>
+
+    <!-- 新建对话按钮 -->
+    <view class="panel-new-btn" bindtap="onNewChat" catchtap="onCloseHistory">
+      <text>＋ 开始新对话</text>
+    </view>
+  </view>
 
 </view>

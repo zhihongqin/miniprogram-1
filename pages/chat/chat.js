@@ -1,54 +1,223 @@
 const api = require('../../utils/api')
-const { showToast } = require('../../utils/util')
+const { showToast, formatRelativeTime } = require('../../utils/util')
+const { mdToHtml } = require('../../utils/markdown')
 
 const QUICK_QUESTIONS = [
-  '劳动合同到期不续签需要赔偿吗？',
-  '签了合同对方违约怎么办？',
-  '跨国贸易纠纷如何维权？',
-  '知识产权侵权如何索赔？'
+  '劳动合同到期不续签，公司需要支付赔偿金吗？',
+  '跨国合同对方违约，我该如何维权？',
+  '知识产权被侵权，索赔流程是什么？',
+  '中美贸易争端中企业如何应对制裁？'
 ]
 
 Page({
   data: {
+    // 登录态
     isLoggedIn: false,
+
+    // 当前对话
     messages: [],
     inputText: '',
     loading: false,
     chatId: '',
+    sessionTitle: '新对话',
     showQuickQuestions: true,
     quickQuestions: QUICK_QUESTIONS,
-    scrollToId: ''
+    scrollToId: '',
+
+    // 历史面板
+    showHistory: false,
+    historyList: [],
+    historyLoading: false,
+    historyPage: 1,
+    historyHasMore: true,
+
+    // 输入框字符数
+    inputLen: 0
   },
 
   onLoad() {
-    this.setData({ chatId: 'chat_' + Date.now() })
+    this._resetSession()
   },
 
   onShow() {
-    const app = getApp()
-    const loggedIn = app.isLoggedIn()
+    const loggedIn = getApp().isLoggedIn()
+    const wasLoggedIn = this.data.isLoggedIn
     this.setData({ isLoggedIn: loggedIn })
 
-    // 刚完成登录后返回页面，补发欢迎语
+    if (loggedIn && !wasLoggedIn && this.data.messages.length === 0) {
+      this._showWelcome()
+    }
     if (loggedIn && this.data.messages.length === 0) {
-      this._addAiMessage(
-        '您好！我是法律智能助手，专注于涉外法律领域。\n\n' +
-        '您可以向我咨询合同纠纷、知识产权、贸易争端、劳动法等方面的问题，我会尽力为您提供专业解答。'
-      )
+      this._showWelcome()
     }
   },
+
+  // ─── 登录 ────────────────────────────────────────────────────────────────────
 
   onGoLogin() {
     wx.navigateTo({ url: '/pages/login/login' })
   },
 
+  // ─── 新对话 ──────────────────────────────────────────────────────────────────
+
+  onNewChat() {
+    if (this.data.messages.length === 0) return
+    wx.showModal({
+      title: '开始新对话',
+      content: '当前对话将保存在历史记录中，确定开始新对话？',
+      confirmText: '确定',
+      success: (res) => {
+        if (res.confirm) {
+          this._resetSession()
+          this._showWelcome()
+        }
+      }
+    })
+  },
+
+  _resetSession() {
+    this.setData({
+      messages: [],
+      chatId: 'chat_' + Date.now(),
+      sessionTitle: '新对话',
+      showQuickQuestions: true,
+      inputText: '',
+      inputLen: 0
+    })
+  },
+
+  _showWelcome() {
+    if (this.data.messages.length > 0) return
+    this._addAiMessage(
+      '您好！我是法律智能助手，专注于涉外法律领域。\n\n' +
+      '可咨询：合同纠纷 · 知识产权 · 贸易争端 · 国际仲裁 · 劳动法等问题。'
+    )
+  },
+
+  // ─── 历史面板 ────────────────────────────────────────────────────────────────
+
+  onOpenHistory() {
+    if (!this.data.isLoggedIn) {
+      showToast('请先登录')
+      return
+    }
+    this.setData({
+      showHistory: true,
+      historyList: [],
+      historyPage: 1,
+      historyHasMore: true
+    })
+    this._loadHistory()
+  },
+
+  onCloseHistory() {
+    this.setData({ showHistory: false })
+  },
+
+  async _loadHistory(reset = false) {
+    if (this.data.historyLoading) return
+    if (!this.data.historyHasMore && !reset) return
+
+    const page = reset ? 1 : this.data.historyPage
+    this.setData({ historyLoading: true })
+
+    try {
+      const result = await api.getChatSessions(page, 20)
+      const records = (result.records || []).map(s => ({
+        ...s,
+        _timeAgo: formatRelativeTime(s.updatedAt)
+      }))
+      const list = reset ? records : [...this.data.historyList, ...records]
+      this.setData({
+        historyList: list,
+        historyPage: page + 1,
+        historyHasMore: list.length < (result.total || 0),
+        historyLoading: false
+      })
+    } catch (err) {
+      this.setData({ historyLoading: false })
+      showToast('加载历史失败')
+    }
+  },
+
+  onHistoryScrollToLower() {
+    this._loadHistory()
+  },
+
+  async onTapHistory(e) {
+    const { chatId, title } = e.currentTarget.dataset
+    this.setData({ showHistory: false, loading: true })
+    wx.showLoading({ title: '加载中...' })
+
+    try {
+      const session = await api.getChatSessionDetail(chatId)
+      const messages = (session.messages || []).map(m => {
+        const role = m.role === 'assistant' ? 'ai' : 'user'
+        return {
+          id: 'msg_' + m.id,
+          role,
+          content: m.content,
+          nodes: role === 'ai' ? mdToHtml(m.content) : '',
+          time: m.createdAt ? m.createdAt.substring(11, 16) : '',
+          thinking: false
+        }
+      })
+      this.setData({
+        chatId,
+        sessionTitle: title || '历史对话',
+        messages,
+        showQuickQuestions: false,
+        loading: false
+      })
+      wx.hideLoading()
+      this._scrollToBottom()
+    } catch (err) {
+      wx.hideLoading()
+      this.setData({ loading: false })
+      showToast('加载会话失败')
+    }
+  },
+
+  onDeleteHistory(e) {
+    const { chatId, index } = e.currentTarget.dataset
+    wx.showModal({
+      title: '删除会话',
+      content: '确定删除这条历史对话吗？',
+      confirmText: '删除',
+      confirmColor: '#e74c3c',
+      success: async (res) => {
+        if (!res.confirm) return
+        try {
+          await api.deleteChatSession(chatId)
+          const list = [...this.data.historyList]
+          list.splice(index, 1)
+          this.setData({ historyList: list })
+          // 如果删除的是当前会话，重置
+          if (this.data.chatId === chatId) {
+            this._resetSession()
+            this._showWelcome()
+          }
+          showToast('已删除', 'success')
+        } catch (err) {
+          showToast('删除失败')
+        }
+      }
+    })
+  },
+
+  onUnload() {
+    this._stopPolling()
+  },
+
+  // ─── 发送消息 ────────────────────────────────────────────────────────────────
+
   onInputChange(e) {
-    this.setData({ inputText: e.detail.value })
+    const val = e.detail.value
+    this.setData({ inputText: val, inputLen: val.length })
   },
 
   onTapQuickQuestion(e) {
     const question = e.currentTarget.dataset.q
-    this.setData({ inputText: question })
     this._doSend(question)
   },
 
@@ -61,7 +230,6 @@ Page({
   async _doSend(text) {
     if (this.data.loading) return
 
-    // 未登录时拦截，提示去登录
     if (!this.data.isLoggedIn) {
       wx.showModal({
         title: '请先登录',
@@ -75,61 +243,104 @@ Page({
     }
 
     this._addUserMessage(text)
-    this.setData({ inputText: '', loading: true, showQuickQuestions: false })
+    const thinkingId = 'thinking_' + Date.now()
+    this._thinkingId = thinkingId
 
-    // 添加 AI 思考占位
-    const thinkingId = 'msg_' + Date.now()
     this.setData({
-      messages: [...this.data.messages, {
-        id: thinkingId,
-        role: 'ai',
-        content: '',
-        time: this._formatTime(),
-        thinking: true
-      }]
+      inputText: '',
+      inputLen: 0,
+      loading: true,
+      showQuickQuestions: false,
+      sessionTitle: this.data.sessionTitle === '新对话'
+        ? (text.length > 18 ? text.substring(0, 18) + '…' : text)
+        : this.data.sessionTitle
     })
-    this._scrollToBottom()
+    this._addThinking(thinkingId)
 
     try {
+      // 此接口现在快速返回 { taskId, chatId, status:"PENDING" }
       const result = await api.askLegalQuestion(text, this.data.chatId)
-      const answer = (result && result.answer) ? result.answer : (result || '未获取到回答')
-      this._replaceThinking(thinkingId, answer)
+      if (result && result.taskId) {
+        if (result.chatId) this.setData({ chatId: result.chatId })
+        this._startPolling(result.taskId)
+      } else {
+        this._replaceThinking(thinkingId, '服务响应异常，请重试')
+        this.setData({ loading: false })
+        this._scrollToBottom()
+      }
     } catch (err) {
       if (err && err.code === 401) {
-        // Token 过期，清除登录态，提示重新登录
-        this._replaceThinking(thinkingId, '登录已过期，请重新登录后继续提问。')
-        this.setData({ isLoggedIn: false })
-        setTimeout(() => {
-          wx.navigateTo({ url: '/pages/login/login' })
-        }, 1500)
+        this._replaceThinking(thinkingId, '登录已过期，请重新登录后继续。')
+        this.setData({ isLoggedIn: false, loading: false })
+        setTimeout(() => wx.navigateTo({ url: '/pages/login/login' }), 1500)
       } else {
-        const errMsg = (err && err.message) ? err.message : '请求失败，请稍后重试'
-        this._replaceThinking(thinkingId, `抱歉，${errMsg}`)
-        showToast(errMsg)
+        const msg = (err && err.message) ? err.message : '请求失败，请稍后重试'
+        this._replaceThinking(thinkingId, `抱歉，${msg}`)
+        this.setData({ loading: false })
       }
-    } finally {
-      this.setData({ loading: false })
       this._scrollToBottom()
     }
   },
 
-  _replaceThinking(thinkingId, content) {
-    const updated = this.data.messages.map(m =>
-      m.id === thinkingId
-        ? { ...m, content, thinking: false }
-        : m
-    )
-    this.setData({ messages: updated })
+  // ─── 轮询逻辑 ────────────────────────────────────────────────────────────────
+
+  /** 最多轮询 80 次 × 2.5 秒 = 200 秒 */
+  _startPolling(taskId) {
+    this._pollCount = 0
+    this._stopPolling()
+    this._poll(taskId)
   },
 
-  _addUserMessage(content) {
-    const msg = {
-      id: 'msg_' + Date.now(),
-      role: 'user',
-      content,
-      time: this._formatTime(),
-      thinking: false
+  _stopPolling() {
+    if (this._pollTimer) {
+      clearTimeout(this._pollTimer)
+      this._pollTimer = null
     }
+  },
+
+  _poll(taskId) {
+    this._pollCount = (this._pollCount || 0) + 1
+
+    if (this._pollCount > 80) {
+      this._replaceThinking(this._thinkingId, 'AI 响应超时，请稍后重试')
+      this.setData({ loading: false })
+      this._scrollToBottom()
+      return
+    }
+
+    api.pollChatResult(taskId).then(result => {
+      const status = result && result.status
+      if (status === 'DONE') {
+        const answer = result.answer || '未获取到回答'
+        this._replaceThinking(this._thinkingId, answer)
+        this.setData({ loading: false })
+        this._scrollToBottom()
+      } else if (status === 'ERROR') {
+        const msg = result.errorMsg || 'AI 处理失败，请重试'
+        this._replaceThinking(this._thinkingId, `抱歉，${msg}`)
+        this.setData({ loading: false })
+        this._scrollToBottom()
+      } else {
+        // PENDING —— 2.5 秒后再轮询
+        this._pollTimer = setTimeout(() => this._poll(taskId), 2500)
+      }
+    }).catch(err => {
+      if (err && err.code === 401) {
+        this._replaceThinking(this._thinkingId, '登录已过期，请重新登录后继续。')
+        this.setData({ isLoggedIn: false, loading: false })
+        this._scrollToBottom()
+      } else {
+        // 网络抖动 —— 延长间隔后重试，不计入超时次数
+        this._pollCount = Math.max(0, this._pollCount - 1)
+        this._pollTimer = setTimeout(() => this._poll(taskId), 4000)
+      }
+    })
+  },
+
+  // ─── 消息工具 ────────────────────────────────────────────────────────────────
+
+  _addUserMessage(content) {
+    const msg = { id: 'msg_' + Date.now(), role: 'user', content, time: this._now(), thinking: false }
     this.setData({ messages: [...this.data.messages, msg] })
     this._scrollToBottom()
   },
@@ -139,11 +350,25 @@ Page({
       id: 'msg_' + Date.now(),
       role: 'ai',
       content,
-      time: this._formatTime(),
+      nodes: mdToHtml(content),
+      time: this._now(),
       thinking: false
     }
     this.setData({ messages: [...this.data.messages, msg] })
     this._scrollToBottom()
+  },
+
+  _addThinking(id) {
+    const msg = { id, role: 'ai', content: '', nodes: '', time: this._now(), thinking: true }
+    this.setData({ messages: [...this.data.messages, msg] })
+    this._scrollToBottom()
+  },
+
+  _replaceThinking(id, content) {
+    const updated = this.data.messages.map(m =>
+      m.id === id ? { ...m, content, nodes: mdToHtml(content), thinking: false } : m
+    )
+    this.setData({ messages: updated })
   },
 
   _scrollToBottom() {
@@ -152,31 +377,11 @@ Page({
       if (msgs.length > 0) {
         this.setData({ scrollToId: msgs[msgs.length - 1].id })
       }
-    }, 100)
+    }, 80)
   },
 
-  _formatTime() {
+  _now() {
     const d = new Date()
-    const h = d.getHours().toString().padStart(2, '0')
-    const m = d.getMinutes().toString().padStart(2, '0')
-    return `${h}:${m}`
-  },
-
-  onClearChat() {
-    if (!this.data.isLoggedIn) return
-    wx.showModal({
-      title: '清空对话',
-      content: '确定要清空当前对话记录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.setData({
-            messages: [],
-            chatId: 'chat_' + Date.now(),
-            showQuickQuestions: true
-          })
-          this._addAiMessage('对话已清空，请继续向我提问。')
-        }
-      }
-    })
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
   }
 })
