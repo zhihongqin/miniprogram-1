@@ -111,5 +111,39 @@ Page({
         success: () => showToast('链接已复制到剪贴板')
       })
     }
+  },
+
+  onOpenPdf() {
+    const id = this.data.id
+    if (!id) return
+
+    const proxyUrl = `${api.BASE_URL}/cases/${id}/pdf-proxy`
+    const token = wx.getStorageSync('token')
+
+    wx.showLoading({ title: '文书加载中...', mask: true })
+
+    wx.downloadFile({
+      url: proxyUrl,
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success(res) {
+        wx.hideLoading()
+        if (res.statusCode === 200) {
+          wx.openDocument({
+            filePath: res.tempFilePath,
+            fileType: 'pdf',
+            showMenu: true,
+            fail() {
+              wx.showToast({ title: '无法打开文书', icon: 'none' })
+            }
+          })
+        } else {
+          wx.showToast({ title: '文书获取失败', icon: 'none' })
+        }
+      },
+      fail() {
+        wx.hideLoading()
+        wx.showToast({ title: '下载失败，请检查网络', icon: 'none' })
+      }
+    })
   }
 })

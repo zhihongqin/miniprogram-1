@@ -58,6 +58,9 @@
           <text class="stat">⭐ {{caseDetail.favoriteCount || 0}} 次收藏</text>
         </view>
         <view class="action-btns">
+          <view class="source-btn pdf-btn" wx:if="{{caseDetail.pdfUrl}}" bindtap="onOpenPdf">
+            <text>📄 查看pdf文书</text>
+          </view>
           <view class="source-btn" wx:if="{{caseDetail.url}}" bindtap="onOpenSource">
             <text>🔗 原文</text>
           </view>
@@ -153,7 +156,7 @@
           bindtap="onSwitchTab"
           data-tab="en"
           wx:if="{{caseDetail.contentEn}}"
-        >英文原文</view>
+        >原文</view>
       </view>
 
       <!-- 中文内容 -->

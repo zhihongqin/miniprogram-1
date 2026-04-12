@@ -4,9 +4,7 @@ const { mdToHtml } = require('../../utils/markdown')
 
 const QUICK_QUESTIONS = [
   '劳动合同到期不续签，公司需要支付赔偿金吗？',
-  '跨国合同对方违约，我该如何维权？',
-  '知识产权被侵权，索赔流程是什么？',
-  '中美贸易争端中企业如何应对制裁？'
+  '跨国合同对方违约，我该如何维权？'
 ]
 
 Page({
@@ -89,8 +87,7 @@ Page({
   _showWelcome() {
     if (this.data.messages.length > 0) return
     this._addAiMessage(
-      '您好！我是法律智能助手，专注于涉外法律领域。\n\n' +
-      '可咨询：合同纠纷 · 知识产权 · 贸易争端 · 国际仲裁 · 劳动法等问题。'
+      '您好！我是法律智能助手。\n\n' 
     )
   },
 

@@ -154,6 +154,12 @@
   color: #F39C12;
 }
 
+.pdf-btn {
+  background: #EBF3FC;
+  border-color: #1A6FBF;
+  color: #1A6FBF;
+}
+
 /* ─── 评分卡片 ───────────────────────────────────────────────────────────────── */
 .score-card {
   background: #fff;
