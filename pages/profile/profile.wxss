@@ -166,6 +166,7 @@
 }
 
 .menu-icon-wrap.fav { background: #FEF9E7; }
+.menu-icon-wrap.notes { background: #eef6ff; }
 .menu-icon-wrap.history { background: #EBF3FC; }
 .menu-icon-wrap.about { background: #EAFAF1; }
 

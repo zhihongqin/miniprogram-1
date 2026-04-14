@@ -8,8 +8,15 @@ Page({
     favoriting: false,
     showFullEn: false,
     activeTab: 'zh',  // zh / en / info
-    id: null
+    id: null,
+    showNotePanel: false,
+    noteLoading: false,
+    noteDraft: '',
+    noteCharLen: 0,
+    noteSaving: false
   },
+
+  preventTouchMove() {},
 
   onLoad(options) {
     const id = options.id
@@ -41,6 +48,7 @@ Page({
         caseDetail: {
           ...detail,
           score,
+          hasNote: !!detail.hasNote,
           _typeName: typeName,
           _typeColor: typeColor,
           _dateStr: dateStr,
@@ -110,6 +118,86 @@ Page({
         data: url,
         success: () => showToast('链接已复制到剪贴板')
       })
+    }
+  },
+
+  onTapNote() {
+    const app = getApp()
+    if (!app.isLoggedIn()) {
+      wx.showModal({
+        title: '提示',
+        content: '笔记功能需要登录，是否前往登录？',
+        success: (res) => {
+          if (res.confirm) wx.navigateTo({ url: '/pages/login/login' })
+        }
+      })
+      return
+    }
+    this.setData({
+      showNotePanel: true,
+      noteLoading: true,
+      noteDraft: '',
+      noteCharLen: 0
+    })
+    api.getCaseNote(this.data.id)
+      .then((data) => {
+        const text = (data && data.content) ? data.content : ''
+        this.setData({
+          noteDraft: text,
+          noteCharLen: text.length,
+          noteLoading: false
+        })
+      })
+      .catch((err) => {
+        this.setData({ noteLoading: false, showNotePanel: false })
+        showToast(err.message || '加载笔记失败')
+      })
+  },
+
+  onCloseNotePanel() {
+    if (this.data.noteSaving) return
+    this.setData({ showNotePanel: false })
+  },
+
+  onNoteInput(e) {
+    const v = e.detail.value || ''
+    this.setData({ noteDraft: v, noteCharLen: v.length })
+  },
+
+  async onSaveNote() {
+    if (this.data.noteSaving || this.data.noteLoading) return
+    this.setData({ noteSaving: true })
+    try {
+      await api.saveCaseNote(this.data.id, this.data.noteDraft)
+      const trimmed = (this.data.noteDraft || '').trim()
+      const detail = this.data.caseDetail
+      this.setData({
+        caseDetail: { ...detail, hasNote: trimmed.length > 0 },
+        noteSaving: false,
+        showNotePanel: false
+      })
+      showToast('已保存', 'success')
+    } catch (err) {
+      this.setData({ noteSaving: false })
+      showToast(err.message || '保存失败')
+    }
+  },
+
+  async onClearAndSaveNote() {
+    if (this.data.noteSaving || this.data.noteLoading) return
+    this.setData({ noteDraft: '', noteCharLen: 0, noteSaving: true })
+    try {
+      await api.saveCaseNote(this.data.id, '')
+      const detail = this.data.caseDetail
+      this.setData({
+        caseDetail: { ...detail, hasNote: false },
+        noteSaving: false,
+        showNotePanel: false
+      })
+      showToast('已清空笔记', 'success')
+    } catch (err) {
+      this.setData({ noteSaving: false })
+      showToast(err.message || '操作失败')
     }
   },
 

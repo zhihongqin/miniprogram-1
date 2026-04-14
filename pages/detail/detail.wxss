@@ -137,15 +137,23 @@
 
 .action-btns {
   display: flex;
+  flex-wrap: wrap;
   gap: 16rpx;
+  justify-content: flex-end;
 }
 
-.source-btn, .fav-btn {
+.source-btn, .fav-btn, .note-btn {
   padding: 12rpx 28rpx;
   border-radius: 50rpx;
   font-size: 26rpx;
   border: 2rpx solid #e0e0e0;
   color: #666;
+}
+
+.note-btn-on {
+  background: #f0f7ff;
+  border-color: #1A6FBF;
+  color: #1A6FBF;
 }
 
 .fav-btn.favorited {
@@ -352,4 +360,129 @@
   text-align: center;
   color: #999;
   font-size: 26rpx;
+}
+
+/* ─── 笔记半屏弹层 ──────────────────────────────────────────────────────────── */
+.note-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+
+.note-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52vh;
+  min-height: 420rpx;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -8rpx 32rpx rgba(0, 0, 0, 0.12);
+}
+
+.note-sheet-bar {
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #e0e0e0;
+  margin: 16rpx auto 8rpx;
+}
+
+.note-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 28rpx 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.note-sheet-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.note-sheet-close {
+  font-size: 28rpx;
+  color: #1A6FBF;
+  padding: 8rpx 12rpx;
+}
+
+.note-sheet-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 28rpx 12rpx;
+}
+
+.note-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.note-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 200rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.65;
+  color: #333;
+  background: #f7f8fa;
+  border-radius: 16rpx;
+  box-sizing: border-box;
+}
+
+.note-ph {
+  color: #bbb;
+}
+
+.note-char-hint {
+  font-size: 22rpx;
+  color: #aaa;
+  text-align: right;
+  padding-top: 8rpx;
+}
+
+.note-sheet-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20rpx;
+  padding: 16rpx 28rpx 8rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.note-btn-ghost {
+  font-size: 28rpx;
+  color: #888;
+  padding: 16rpx 8rpx;
+}
+
+.note-btn-primary {
+  padding: 16rpx 48rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #1A6FBF, #3a90d4);
+}
+
+.note-btn-primary.disabled {
+  opacity: 0.55;
 }

@@ -137,6 +137,25 @@ function deleteBrowseHistory(ids) {
   return request({ url: '/cases/browse-history', method: 'DELETE', data: ids })
 }
 
+/** 获取当前用户对某案例的笔记（需登录） */
+function getCaseNote(caseId) {
+  return request({ url: `/cases/${caseId}/note`, method: 'GET' })
+}
+
+/** 保存案例笔记；content 为空则删除笔记（需登录） */
+function saveCaseNote(caseId, content) {
+  return request({
+    url: `/cases/${caseId}/note`,
+    method: 'PUT',
+    data: { content: content == null ? '' : content }
+  })
+}
+
+/** 我的案例笔记列表（需登录） */
+function getMyCaseNotes(pageNum = 1, pageSize = 10) {
+  return request({ url: '/cases/notes/list', method: 'GET', data: { pageNum, pageSize } })
+}
+
 // ─── 智能问答接口 ─────────────────────────────────────────────────────────────
 
 /**
@@ -253,6 +272,9 @@ module.exports = {
   getFavorites,
   getBrowseHistory,
   deleteBrowseHistory,
+  getCaseNote,
+  saveCaseNote,
+  getMyCaseNotes,
   askLegalQuestion,
   uploadChatFile,
   pollChatResult,

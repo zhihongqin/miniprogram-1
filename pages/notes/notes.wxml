@@ -1,0 +1,32 @@
+<view class="page-container">
+  <view class="list-header" wx:if="{{total > 0}}">
+    <text class="total-text">共 {{total}} 条笔记</text>
+  </view>
+
+  <view
+    wx:for="{{items}}"
+    wx:key="caseId"
+    class="note-card"
+    bindtap="onTapItem"
+    data-id="{{item.caseId}}"
+  >
+    <view class="note-card-head">
+      <text class="note-icon">📝</text>
+      <text class="note-time" wx:if="{{item._timeAgo}}">{{item._timeAgo}}</text>
+    </view>
+    <view class="note-title text-ellipsis-2">{{item.titleZh || item.titleEn}}</view>
+    <view class="note-preview text-ellipsis-2" wx:if="{{item.contentPreview}}">{{item.contentPreview}}</view>
+    <view class="note-preview empty" wx:else>（无正文摘要）</view>
+  </view>
+
+  <view class="load-more" wx:if="{{items.length > 0}}">
+    <text wx:if="{{loading}}">加载中...</text>
+    <text wx:elif="{{!hasMore}}">已显示全部</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && items.length === 0}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无笔记</text>
+    <text class="empty-sub">在案例详情页点击「笔记」即可记录心得</text>
+  </view>
+</view>

@@ -6,6 +6,7 @@ Page({
     userInfo: null,
     isLoggedIn: false,
     favoriteCount: 0,
+    noteCount: 0,
     historyCount: 0
   },
 
@@ -39,12 +40,14 @@ Page({
 
   async loadCounts() {
     try {
-      const [favResult, histResult] = await Promise.all([
+      const [favResult, noteResult, histResult] = await Promise.all([
         api.getFavorites(1, 1),
+        api.getMyCaseNotes(1, 1),
         api.getBrowseHistory(1, 1)
       ])
       this.setData({
         favoriteCount: favResult.total || 0,
+        noteCount: noteResult.total || 0,
         historyCount: histResult.total || 0
       })
     } catch (e) {
@@ -62,6 +65,14 @@ Page({
       return
     }
     wx.navigateTo({ url: '/pages/favorites/favorites' })
+  },
+
+  onTapNotes() {
+    if (!this.data.isLoggedIn) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/notes/notes' })
   },
 
   onTapHistory() {
@@ -83,6 +94,7 @@ Page({
             isLoggedIn: false,
             userInfo: null,
             favoriteCount: 0,
+            noteCount: 0,
             historyCount: 0
           })
           showToast('已退出登录')

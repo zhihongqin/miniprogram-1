@@ -1,0 +1,100 @@
+.page-container {
+  background: #f5f6fa;
+  min-height: 100vh;
+  padding: 20rpx 24rpx;
+}
+
+.list-header {
+  padding: 10rpx 4rpx 16rpx;
+}
+
+.total-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.note-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.note-card:active {
+  opacity: 0.88;
+}
+
+.note-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.note-icon {
+  font-size: 28rpx;
+}
+
+.note-time {
+  font-size: 22rpx;
+  color: #aaa;
+}
+
+.note-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.5;
+  margin-bottom: 12rpx;
+}
+
+.note-preview {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.55;
+}
+
+.note-preview.empty {
+  color: #bbb;
+  font-style: italic;
+}
+
+.text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.load-more {
+  text-align: center;
+  padding: 24rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
+  gap: 16rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #aaa;
+  text-align: center;
+  line-height: 1.6;
+}

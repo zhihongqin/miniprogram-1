@@ -21,6 +21,11 @@
           <text class="stat-label">收藏</text>
         </view>
         <view class="stat-divider"></view>
+        <view class="stat-item" bindtap="onTapNotes">
+          <text class="stat-num">{{noteCount}}</text>
+          <text class="stat-label">笔记</text>
+        </view>
+        <view class="stat-divider"></view>
         <view class="stat-item" bindtap="onTapHistory">
           <text class="stat-num">{{historyCount}}</text>
           <text class="stat-label">浏览记录</text>
@@ -48,6 +53,19 @@
         <text class="menu-text">我的收藏</text>
         <view class="menu-right">
           <text class="menu-count" wx:if="{{isLoggedIn && favoriteCount > 0}}">{{favoriteCount}}</text>
+          <text class="menu-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="onTapNotes">
+        <view class="menu-icon-wrap notes">
+          <text class="menu-icon">📝</text>
+        </view>
+        <text class="menu-text">我的笔记</text>
+        <view class="menu-right">
+          <text class="menu-count" wx:if="{{isLoggedIn && noteCount > 0}}">{{noteCount}}</text>
           <text class="menu-arrow">›</text>
         </view>
       </view>

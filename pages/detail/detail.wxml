@@ -65,6 +65,12 @@
             <text>🔗 原文</text>
           </view>
           <view
+            class="note-btn {{caseDetail.hasNote ? 'note-btn-on' : ''}}"
+            bindtap="onTapNote"
+          >
+            <text>📝 笔记</text>
+          </view>
+          <view
             class="fav-btn {{caseDetail.isFavorited ? 'favorited' : ''}}"
             bindtap="onToggleFavorite"
           >
@@ -184,6 +190,44 @@
   <view class="error-state" wx:elif="{{!loading}}">
     <text class="error-icon">⚠️</text>
     <text class="error-text">案例加载失败</text>
+  </view>
+
+  <!-- 笔记半屏弹层 -->
+  <view
+    class="note-mask"
+    wx:if="{{showNotePanel}}"
+    catchtap="onCloseNotePanel"
+    catchtouchmove="preventTouchMove"
+  ></view>
+  <view class="note-sheet" wx:if="{{showNotePanel}}" catchtouchmove="preventTouchMove">
+    <view class="note-sheet-bar"></view>
+    <view class="note-sheet-head">
+      <text class="note-sheet-title">案例笔记</text>
+      <text class="note-sheet-close" catchtap="onCloseNotePanel">关闭</text>
+    </view>
+    <view class="note-sheet-body">
+      <view wx:if="{{noteLoading}}" class="note-loading">加载中...</view>
+      <block wx:else>
+        <textarea
+          class="note-textarea"
+          placeholder="记录阅读心得、要点摘录…"
+          placeholder-class="note-ph"
+          maxlength="10000"
+          value="{{noteDraft}}"
+          bindinput="onNoteInput"
+          show-confirm-bar="{{false}}"
+          cursor-spacing="24"
+        />
+        <text class="note-char-hint">{{noteCharLen}}/10000</text>
+      </block>
+    </view>
+    <view class="note-sheet-foot">
+      <view class="note-btn-ghost" catchtap="onClearAndSaveNote">清空并保存</view>
+      <view
+        class="note-btn-primary {{noteSaving ? 'disabled' : ''}}"
+        catchtap="onSaveNote"
+      >{{noteSaving ? '保存中…' : '保存'}}</view>
+    </view>
   </view>
 
 </view>
