@@ -85,6 +85,16 @@
     </view>
 
     <view class="menu-group">
+      <view class="menu-item" bindtap="onTapFeedback">
+        <view class="menu-icon-wrap feedback">
+          <text class="menu-icon">💬</text>
+        </view>
+        <text class="menu-text">意见反馈</text>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-divider"></view>
+
       <view class="menu-item" bindtap="onTapAbout">
         <view class="menu-icon-wrap about">
           <text class="menu-icon">ℹ️</text>

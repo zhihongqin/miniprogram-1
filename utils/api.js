@@ -156,6 +156,11 @@ function getMyCaseNotes(pageNum = 1, pageSize = 10) {
   return request({ url: '/cases/notes/list', method: 'GET', data: { pageNum, pageSize } })
 }
 
+/** 提交系统反馈（需登录） */
+function submitFeedback(payload) {
+  return request({ url: '/feedback', method: 'POST', data: payload })
+}
+
 // ─── 智能问答接口 ─────────────────────────────────────────────────────────────
 
 /**
@@ -275,6 +280,7 @@ module.exports = {
   getCaseNote,
   saveCaseNote,
   getMyCaseNotes,
+  submitFeedback,
   askLegalQuestion,
   uploadChatFile,
   pollChatResult,

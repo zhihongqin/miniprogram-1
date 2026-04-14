@@ -8,7 +8,8 @@
     "pages/login/login",
     "pages/favorites/favorites",
     "pages/history/history",
-    "pages/notes/notes"
+    "pages/notes/notes",
+    "pages/feedback/feedback"
   ],
   "tabBar": {
     "color": "#999999",

@@ -103,6 +103,14 @@ Page({
     })
   },
 
+  onTapFeedback() {
+    if (!this.data.isLoggedIn) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/feedback/feedback' })
+  },
+
   onTapAbout() {
     wx.showModal({
       title: '关于本系统',
