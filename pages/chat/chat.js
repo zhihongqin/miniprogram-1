@@ -30,7 +30,10 @@ Page({
     historyHasMore: true,
 
     // 输入框字符数
-    inputLen: 0
+    inputLen: 0,
+
+    /** 待发送的附件 { url, fileName }，发送成功后清空 */
+    attachedFile: null
   },
 
   onLoad() {
@@ -80,7 +83,8 @@ Page({
       sessionTitle: '新对话',
       showQuickQuestions: true,
       inputText: '',
-      inputLen: 0
+      inputLen: 0,
+      attachedFile: null
     })
   },
 
@@ -154,6 +158,8 @@ Page({
           id: 'msg_' + m.id,
           role,
           content: m.content,
+          fileUrl: m.fileUrl || '',
+          fileName: m.fileName || '',
           nodes: role === 'ai' ? mdToHtml(m.content) : '',
           time: m.createdAt ? m.createdAt.substring(11, 16) : '',
           thinking: false
@@ -224,6 +230,78 @@ Page({
     this._doSend(text)
   },
 
+  _ensureLoginForUpload() {
+    if (this.data.isLoggedIn) return true
+    wx.showModal({
+      title: '请先登录',
+      content: '上传附件需要登录，是否前往登录？',
+      confirmText: '去登录',
+      success: (res) => {
+        if (res.confirm) wx.navigateTo({ url: '/pages/login/login' })
+      }
+    })
+    return false
+  },
+
+  onChooseImage() {
+    if (!this._ensureLoginForUpload()) return
+    if (this.data.loading) return
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      sizeType: ['compressed'],
+      success: (res) => {
+        const f = res.tempFiles && res.tempFiles[0]
+        if (!f || !f.tempFilePath) return
+        this._uploadChatFile(f.tempFilePath)
+      }
+    })
+  },
+
+  onChooseFile() {
+    if (!this._ensureLoginForUpload()) return
+    if (this.data.loading) return
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['pdf', 'doc', 'docx', 'txt'],
+      success: (res) => {
+        const f = res.tempFiles[0]
+        if (!f) return
+        this._uploadChatFile(f.path)
+      }
+    })
+  },
+
+  async _uploadChatFile(filePath) {
+    wx.showLoading({ title: '上传中...', mask: true })
+    try {
+      const data = await api.uploadChatFile(filePath)
+      this.setData({
+        attachedFile: { url: data.url, fileName: data.fileName || '附件' }
+      })
+      showToast('附件已添加', 'success')
+    } catch (err) {
+      showToast((err && err.message) ? err.message : '上传失败')
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
+  onRemoveAttachment() {
+    this.setData({ attachedFile: null })
+  },
+
+  onOpenAttachment(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.setClipboardData({
+      data: url,
+      success: () => showToast('附件链接已复制')
+    })
+  },
+
   async _doSend(text) {
     if (this.data.loading) return
 
@@ -239,7 +317,8 @@ Page({
       return
     }
 
-    this._addUserMessage(text)
+    const attach = this.data.attachedFile
+    this._addUserMessage(text, attach)
     const thinkingId = 'thinking_' + Date.now()
     this._thinkingId = thinkingId
 
@@ -256,7 +335,12 @@ Page({
 
     try {
       // 此接口现在快速返回 { taskId, chatId, status:"PENDING" }
-      const result = await api.askLegalQuestion(text, this.data.chatId)
+      const result = await api.askLegalQuestion(
+        text,
+        this.data.chatId,
+        attach ? attach.url : undefined,
+        attach ? attach.fileName : undefined
+      )
       if (result && result.taskId) {
         if (result.chatId) this.setData({ chatId: result.chatId })
         this._startPolling(result.taskId)
@@ -336,9 +420,20 @@ Page({
 
   // ─── 消息工具 ────────────────────────────────────────────────────────────────
 
-  _addUserMessage(content) {
-    const msg = { id: 'msg_' + Date.now(), role: 'user', content, time: this._now(), thinking: false }
-    this.setData({ messages: [...this.data.messages, msg] })
+  _addUserMessage(content, attach) {
+    const msg = {
+      id: 'msg_' + Date.now(),
+      role: 'user',
+      content,
+      fileUrl: attach && attach.url ? attach.url : '',
+      fileName: attach && attach.fileName ? attach.fileName : '',
+      time: this._now(),
+      thinking: false
+    }
+    this.setData({
+      messages: [...this.data.messages, msg],
+      attachedFile: null
+    })
     this._scrollToBottom()
   },
 

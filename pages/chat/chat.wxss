@@ -258,6 +258,8 @@
   align-items: flex-end;
   margin-bottom: 28rpx;
   gap: 14rpx;
+  /* 防止子项被长内容撑出屏幕 */
+  min-width: 0;
 }
 
 .row-ai  { flex-direction: row; }
@@ -293,9 +295,10 @@
   color: #1A6FBF;
 }
 
-/* 气泡列 */
+/* 气泡列（flex 子项须 min-width:0，否则 max-width 无法限制长无断行字符串） */
 .bubble-col {
   max-width: 68%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -310,6 +313,9 @@
   padding: 20rpx 26rpx;
   border-radius: 18rpx;
   word-break: break-all;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .bubble-ai {
@@ -322,6 +328,7 @@
   background: linear-gradient(135deg, #1A6FBF, #3a90d4);
   border-bottom-right-radius: 4rpx;
   box-shadow: 0 4rpx 14rpx rgba(26,111,191,0.22);
+  overflow: hidden;
 }
 
 .bubble-txt {
@@ -424,8 +431,9 @@
 ════════════════════════════════════════════════════ */
 .input-area {
   display: flex;
-  align-items: flex-end;
-  gap: 14rpx;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12rpx;
   padding: 14rpx 20rpx;
   padding-bottom: calc(14rpx + env(safe-area-inset-bottom));
   background: #fff;
@@ -433,8 +441,98 @@
   flex-shrink: 0;
 }
 
+.attach-triggers {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14rpx;
+  flex-shrink: 0;
+}
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14rpx;
+  min-width: 0;
+}
+
+.attach-trigger {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: #eef4fc;
+  border: 1rpx solid #d0ddf0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.attach-trigger-icon {
+  font-size: 34rpx;
+}
+
+.attach-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 20rpx 0;
+  gap: 12rpx;
+}
+
+.attach-preview-name {
+  flex: 1;
+  font-size: 24rpx;
+  color: #1A6FBF;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attach-preview-remove {
+  font-size: 28rpx;
+  color: #999;
+  padding: 4rpx 12rpx;
+}
+
+.user-attach {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+  padding: 10rpx 14rpx;
+  background: rgba(26, 111, 191, 0.08);
+  border-radius: 12rpx;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.user-attach-icon {
+  font-size: 26rpx;
+  flex-shrink: 0;
+}
+
+.user-attach-name {
+  flex: 1;
+  font-size: 24rpx;
+  color: #1A6FBF;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-attach-hint {
+  font-size: 20rpx;
+  color: #888;
+  flex-shrink: 0;
+}
+
 .input-box {
   flex: 1;
+  min-width: 0;
   background: #f2f5f9;
   border-radius: 20rpx;
   border: 1rpx solid #e4e8f0;

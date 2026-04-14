@@ -44,6 +44,10 @@
           <text class="gf-dot"></text>
           <text class="gf-text">历史对话随时查阅回顾</text>
         </view>
+        <view class="gate-feature">
+          <text class="gf-dot"></text>
+          <text class="gf-text">支持上传 pdf / word / txt 附件咨询</text>
+        </view>
       </view>
       <view class="gate-login-btn" bindtap="onGoLogin">
         <text>立即登录，开始咨询</text>
@@ -103,13 +107,24 @@
                 class="ai-rich"
                 nodes="{{item.nodes}}"
               ></rich-text>
-              <!-- 用户消息：纯文本 -->
-              <text
-                wx:else
-                class="bubble-txt"
-                user-select="{{true}}"
-                space="nbsp"
-              >{{item.content}}</text>
+              <!-- 用户消息：可选附件 + 纯文本 -->
+              <block wx:else>
+                <view
+                  class="user-attach"
+                  wx:if="{{item.fileUrl}}"
+                  bindtap="onOpenAttachment"
+                  data-url="{{item.fileUrl}}"
+                >
+                  <text class="user-attach-icon">📎</text>
+                  <view class="user-attach-name">{{item.fileName}}</view>
+                  <text class="user-attach-hint">复制链接</text>
+                </view>
+                <text
+                  class="bubble-txt"
+                  user-select="{{true}}"
+                  space="nbsp"
+                >{{item.content}}</text>
+              </block>
             </view>
             <text class="msg-time">{{item.time}}</text>
           </view>
@@ -139,33 +154,47 @@
       </view>
     </scroll-view>
 
-    <!-- 底部输入区 -->
+    <!-- 底部输入区：上传按钮在输入框上方 -->
     <view class="input-area">
-      <view class="input-box">
-        <input
-          class="input-field"
-          placeholder="输入您的法律问题..."
-          placeholder-class="input-ph"
-          value="{{inputText}}"
-          bindinput="onInputChange"
-          bindconfirm="onSend"
-          adjust-position="{{true}}"
-          cursor-spacing="16"
-          maxlength="500"
-          confirm-type="send"
-        />
-        <text class="char-count" wx:if="{{inputLen > 400}}">{{inputLen}}/500</text>
-      </view>
-      <view
-        class="send-btn {{(inputText && !loading) ? 'send-on' : 'send-off'}}"
-        bindtap="onSend"
-      >
-        <view wx:if="{{loading}}" class="send-loading">
-          <view class="sl-dot"></view>
-          <view class="sl-dot"></view>
-          <view class="sl-dot"></view>
+      <view class="attach-triggers">
+        <view class="attach-trigger" bindtap="onChooseImage">
+          <text class="attach-trigger-icon">🖼</text>
         </view>
-        <text wx:else class="send-txt">发送</text>
+        <view class="attach-trigger" bindtap="onChooseFile">
+          <text class="attach-trigger-icon">📎</text>
+        </view>
+      </view>
+      <view class="input-row">
+        <view class="input-box">
+          <view class="attach-preview" wx:if="{{attachedFile}}">
+            <text class="attach-preview-name">📎 {{attachedFile.fileName}}</text>
+            <text class="attach-preview-remove" catchtap="onRemoveAttachment">✕</text>
+          </view>
+          <input
+            class="input-field"
+            placeholder="输入您的法律问题..."
+            placeholder-class="input-ph"
+            value="{{inputText}}"
+            bindinput="onInputChange"
+            bindconfirm="onSend"
+            adjust-position="{{true}}"
+            cursor-spacing="16"
+            maxlength="500"
+            confirm-type="send"
+          />
+          <text class="char-count" wx:if="{{inputLen > 400}}">{{inputLen}}/500</text>
+        </view>
+        <view
+          class="send-btn {{(inputText && !loading) ? 'send-on' : 'send-off'}}"
+          bindtap="onSend"
+        >
+          <view wx:if="{{loading}}" class="send-loading">
+            <view class="sl-dot"></view>
+            <view class="sl-dot"></view>
+            <view class="sl-dot"></view>
+          </view>
+          <text wx:else class="send-txt">发送</text>
+        </view>
       </view>
     </view>
   </block>

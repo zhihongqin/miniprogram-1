@@ -142,12 +142,64 @@ function deleteBrowseHistory(ids) {
 /**
  * 异步提问 —— 立即返回 { taskId, chatId, status:"PENDING" }，不等待 AI 完成。
  * 后续通过 pollChatResult 轮询结果。
+ * @param {string} [fileUrl] 附件 COS 地址（须先 uploadChatFile）
+ * @param {string} [fileName] 附件原始文件名
  */
-function askLegalQuestion(question, chatId) {
+function askLegalQuestion(question, chatId, fileUrl, fileName) {
+  const data = { question, chatId }
+  if (fileUrl) data.fileUrl = fileUrl
+  if (fileName) data.fileName = fileName
   return request({
     url: '/chat/ask',
     method: 'POST',
-    data: { question, chatId }
+    data
+  })
+}
+
+/**
+ * 上传问答附件到后端 COS（需登录）
+ * @param {string} filePath 微信本地临时路径
+ * @returns {Promise<{ url: string, fileName: string }>}
+ */
+function uploadChatFile(filePath) {
+  return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token')
+    wx.uploadFile({
+      url: BASE_URL + '/files/upload',
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success(res) {
+        try {
+          const body = JSON.parse(res.data)
+          if (body.code === 200 || body.code === 0) {
+            resolve(body.data)
+          } else if (body.code === 401) {
+            wx.removeStorageSync('token')
+            wx.removeStorageSync('userInfo')
+            const app = getApp()
+            if (app) {
+              app.globalData.token = null
+              app.globalData.userInfo = null
+            }
+            const pages = getCurrentPages()
+            const currentPage = pages[pages.length - 1]
+            const route = currentPage ? currentPage.route : ''
+            if (route && !route.includes('login')) {
+              wx.navigateTo({ url: '/pages/login/login' })
+            }
+            reject({ code: 401, message: '请先登录' })
+          } else {
+            reject({ code: body.code, message: body.message || '上传失败' })
+          }
+        } catch (e) {
+          reject({ code: -2, message: '上传响应解析失败' })
+        }
+      },
+      fail(err) {
+        reject({ code: -1, message: err.errMsg || '上传失败' })
+      }
+    })
   })
 }
 
@@ -202,6 +254,7 @@ module.exports = {
   getBrowseHistory,
   deleteBrowseHistory,
   askLegalQuestion,
+  uploadChatFile,
   pollChatResult,
   getChatSessions,
   getChatSessionDetail,
